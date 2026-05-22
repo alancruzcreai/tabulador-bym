@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotiza tu proyecto · B&amp;M</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" type="image/png" href="assets/LOGO.PNG" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a href="index.html" class="brand" style="text-decoration:none; color:inherit;">
+          <div>
+            <div style="font-weight:500;">Cotizador</div>
+            <div style="font-size:11px; color:var(--gray-500); margin-top:-2px;">Cliente</div>
+          </div>
+        </a>
+        <div class="topbar-right">
+          <span class="mode-pill cliente"><span id="pillIcon"></span> Cliente</span>
+          <img class="topbar-logo" src="assets/LOGO.PNG" alt="B&amp;M Construcción" />
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="wizard-shell">
+        <!-- Stepper -->
+        <div class="stepper">
+          <div class="step" data-step="1"><div class="step-num">1</div> Servicios</div>
+          <div class="step-line"></div>
+          <div class="step" data-step="2"><div class="step-num">2</div> Tamaño</div>
+          <div class="step-line"></div>
+          <div class="step" data-step="3"><div class="step-num">3</div> Tus datos</div>
+          <div class="step-line"></div>
+          <div class="step" data-step="4"><div class="step-num">4</div> Cotización</div>
+        </div>
+
+        <!-- STEP 1: Servicios -->
+        <div class="wizard-card card" data-screen="1">
+          <h2>¿Qué proyecto tienes en mente?</h2>
+          <p class="subtitle">Selecciona uno o más servicios. Después podrás especificar tamaño y detalles.</p>
+
+          <div class="service-grid" id="serviceGrid"></div>
+
+          <div class="wizard-foot">
+            <a href="index.html" class="btn btn-ghost"><span id="backHomeIcon"></span> Volver</a>
+            <button class="btn btn-primary" id="step1Next" disabled>
+              Continuar <span id="next1Icon"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Tamaño / cantidad -->
+        <div class="wizard-card card hidden" data-screen="2">
+          <h2>Dimensiones del proyecto</h2>
+          <p class="subtitle">Esta información nos permite estimar el alcance. Si no estás seguro, pon un aproximado.</p>
+
+          <div id="sizeCards"></div>
+
+          <div class="wizard-foot">
+            <button class="btn btn-ghost" data-prev="2"><span id="prev2Icon"></span> Anterior</button>
+            <button class="btn btn-primary" id="step2Next">
+              Continuar <span id="next2Icon"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Datos -->
+        <div class="wizard-card card hidden" data-screen="3">
+          <h2>¿Cómo te contactamos?</h2>
+          <p class="subtitle">Tus datos sólo se usan para enviarte la cotización formal.</p>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="field">
+              <label>Nombre completo</label>
+              <input type="text" class="input" id="cliNombre" placeholder="María García" />
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="tel" class="input" id="cliTelefono" placeholder="961 ..." />
+            </div>
+            <div class="field">
+              <label>Correo</label>
+              <input type="email" class="input" id="cliEmail" placeholder="tu@correo.com" />
+            </div>
+            <div class="field">
+              <label>Ciudad / colonia</label>
+              <input type="text" class="input" id="cliCiudad" placeholder="Tuxtla Gutiérrez" />
+            </div>
+            <div class="field" style="grid-column: 1 / -1;">
+              <label>Cuéntanos brevemente sobre el proyecto (opcional)</label>
+              <textarea class="textarea" id="cliNotas" placeholder="Tengo una cocina de 30m² que quiero remodelar..."></textarea>
+            </div>
+          </div>
+
+          <div class="wizard-foot">
+            <button class="btn btn-ghost" data-prev="3"><span id="prev3Icon"></span> Anterior</button>
+            <button class="btn btn-primary" id="step3Next">
+              Ver mi cotización <span id="next3Icon"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 4: Cotización -->
+        <div class="wizard-card card hidden" data-screen="4">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <span class="badge badge-success">✓ Cotización lista</span>
+          </div>
+          <h2>Tu cotización estimada</h2>
+          <p class="subtitle">Esta es una estimación basada en valores promedio. Para precio final, agendamos una visita técnica.</p>
+
+          <div class="card-flat" id="quoteDetail" style="margin-top:24px;"></div>
+
+          <div class="estimate-box">
+            <div>
+              <div class="label">Inversión estimada</div>
+              <div class="hint">Sujeta a confirmación tras visita</div>
+            </div>
+            <div class="total mono" id="estimateTotal">$0.00</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px;">
+            <button class="btn btn-primary btn-lg" id="btnDownloadEst">
+              <span id="dlIcon"></span> Descargar PDF
+            </button>
+            <button class="btn btn-dark btn-lg" id="btnRequestFormal">
+              <span id="reqIcon"></span> Solicitar cotización formal
+            </button>
+          </div>
+
+          <div class="card-blue" style="margin-top:24px;">
+            <div style="display:flex; align-items:flex-start; gap:12px;">
+              <span id="infoIcon" style="color:var(--blue); flex-shrink:0;"></span>
+              <div>
+                <div style="font-weight:500; margin-bottom:4px; color:var(--black);">¿Qué sigue?</div>
+                <p style="font-size:13px; color:var(--gray-700); margin:0;">
+                  Al solicitar cotización formal, el equipo de B&amp;M te contactará para agendar una visita técnica gratuita. Ahí se medirán los espacios, evaluará la naturaleza del terreno y se preparará una cotización detallada con tiempos y materiales específicos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-foot">
+            <button class="btn btn-ghost" data-prev="4"><span id="prev4Icon"></span> Modificar</button>
+            <a href="index.html" class="btn btn-secondary">Volver al inicio</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-foot">
+      19 poniente norte #305 · Las Arboledas · Tuxtla Gutiérrez, Chiapas · 961 120 0355
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="assets/icons.js?v=2"></script>
+  <script src="assets/catalog.js?v=2"></script>
+  <script src="assets/store.js?v=2"></script>
+  <script src="assets/pdf.js?v=2"></script>
+  <script src="assets/cliente.js?v=2"></script>
+</body>
+</html>

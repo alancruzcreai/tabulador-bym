@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · B&amp;M Cotizador</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" type="image/png" href="assets/LOGO.PNG" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a href="index.html" class="brand" style="text-decoration:none; color:inherit;">
+          <div>
+            <div style="font-weight:500;">Cotizador</div>
+            <div style="font-size:11px; color:var(--gray-500); margin-top:-2px;">Modo administrador</div>
+          </div>
+        </a>
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <span class="mode-pill"><span id="pillIcon"></span> Administrador</span>
+            <button class="btn btn-secondary btn-sm" id="btnHistory">
+              <span id="btnHistoryIcon"></span> Histórico <span class="badge badge-yellow" id="historyBadge" style="display:none;">0</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnDemo">
+              <span id="btnDemoIcon"></span> Cargar demo
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnReset">
+              <span id="btnResetIcon"></span> Limpiar
+            </button>
+          </div>
+          <img class="topbar-logo" src="assets/LOGO.PNG" alt="B&amp;M Construcción" />
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="toolbar">
+        <div>
+          <h2>Cotización</h2>
+          <p>Captura los datos del cliente, agrega secciones y los conceptos de mano de obra y materiales.</p>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn btn-ghost btn-sm" id="btnPreview">
+            <span id="btnPrevIcon"></span> Vista previa
+          </button>
+          <div class="popover">
+            <button class="btn btn-dark" id="btnAddSection">
+              <span id="btnAddIcon"></span> Agregar sección
+            </button>
+            <div class="popover-menu" id="addSectionMenu">
+              <div class="label">Plantillas</div>
+              <button data-template="cocina">🏠 Cocina (remodelación completa)</button>
+              <button data-template="fachada">🏢 Fachada comercial</button>
+              <button data-template="hidraulica">💧 Plomería e hidráulica</button>
+              <button data-template="electrica">⚡ Instalación eléctrica</button>
+              <button data-template="gas">🔥 Gas estacionario</button>
+              <button data-template="pintura">🎨 Pintura y acabados</button>
+              <div class="divider"></div>
+              <button data-template="blank">＋ Sección en blanco</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div>
+          <!-- DATOS DEL CLIENTE -->
+          <div class="card mb-4" style="margin-bottom:24px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+              <div>
+                <div class="eyebrow" style="margin-bottom:4px;">Datos del cliente</div>
+                <h4 style="font-size:16px; font-weight:500;">Información de la cotización</h4>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span class="badge badge-blue mono" id="numBadge">Cot. #—</span>
+              </div>
+            </div>
+
+            <div class="client-block" style="border:none; padding:0; margin:0;">
+              <div class="field">
+                <label>Número de cotización</label>
+                <input type="text" class="input mono" data-bind="cotizacionNum" placeholder="0301" />
+              </div>
+              <div class="field">
+                <label>Fecha</label>
+                <input type="date" class="input mono" data-bind="fecha" />
+              </div>
+              <div class="field">
+                <label>Atención a</label>
+                <input type="text" class="input" data-bind="cliente.atencion" placeholder="Mario Alberto Gamboa" />
+              </div>
+              <div class="field">
+                <label>Proyecto / obra</label>
+                <input type="text" class="input" data-bind="cliente.proyecto" placeholder="Daltónico Cocina" />
+              </div>
+              <div class="field">
+                <label>Teléfono</label>
+                <input type="text" class="input" data-bind="cliente.telefono" placeholder="961 ..." />
+              </div>
+              <div class="field">
+                <label>Correo</label>
+                <input type="email" class="input" data-bind="cliente.email" placeholder="cliente@correo.com" />
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label>Dirección de la obra</label>
+                <input type="text" class="input" data-bind="cliente.direccion" placeholder="Calle, número, colonia, ciudad" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIONES -->
+          <div id="sectionsContainer"></div>
+
+          <!-- EMPTY STATE -->
+          <div class="empty hidden" id="emptyState">
+            <h3>Empieza agregando una sección</h3>
+            <p>Cada sección agrupa mano de obra y materiales de un alcance (por ejemplo: Cocina, Fachada, Eléctrica). Usa una plantilla para arrancar rápido.</p>
+            <button class="btn btn-primary" id="btnEmptyAdd">
+              <span id="btnEmptyAddIcon"></span> Agregar primera sección
+            </button>
+          </div>
+
+          <!-- TÉRMINOS -->
+          <div class="card" style="margin-top:24px;">
+            <div class="eyebrow" style="margin-bottom:16px;">Términos del proyecto</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+              <div class="field">
+                <label>Validez de la cotización (días)</label>
+                <div class="input-group">
+                  <input type="number" class="input" data-bind="validezDias" />
+                  <span class="addon">días</span>
+                </div>
+              </div>
+              <div class="field">
+                <label>Garantía</label>
+                <input type="text" class="input" data-bind="garantia" />
+              </div>
+            </div>
+
+            <div class="eyebrow" style="margin:16px 0 8px;">Forma de pago sugerida</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+              <div class="field">
+                <label>Anticipo</label>
+                <div class="input-group">
+                  <input type="number" class="input" data-bind="formaPago.anticipo" />
+                  <span class="addon">%</span>
+                </div>
+              </div>
+              <div class="field">
+                <label>Avance de obra</label>
+                <div class="input-group">
+                  <input type="number" class="input" data-bind="formaPago.avance" />
+                  <span class="addon">%</span>
+                </div>
+              </div>
+              <div class="field">
+                <label>Entrega final</label>
+                <div class="input-group">
+                  <input type="number" class="input" data-bind="formaPago.final" />
+                  <span class="addon">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field" style="margin-top:16px;">
+              <label>Notas adicionales</label>
+              <textarea class="textarea" data-bind="notas" placeholder="Cualquier consideración especial del proyecto..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDEBAR — RESUMEN -->
+        <aside>
+          <div class="summary">
+            <div class="eyebrow" style="color:var(--gray-400); margin-bottom:8px;">Resumen</div>
+            <h3>Total del proyecto</h3>
+
+            <div class="summary-row">
+              <span class="label">Mano de obra</span>
+              <span class="value mono" id="sumMO">$0.00</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Materiales</span>
+              <span class="value mono" id="sumMat">$0.00</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Subtotal</span>
+              <span class="value mono" id="sumSub">$0.00</span>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-row">
+              <span class="label">Utilidad global</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="number" class="input mono" data-bind="porcentajeGlobalAdicional" style="width:56px; padding:4px 6px; font-size:12px; background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.12); color:var(--white); text-align:right;" />
+                <span style="color:var(--gray-400); font-size:12px;">%</span>
+              </div>
+            </div>
+            <div class="summary-row">
+              <span class="label">Adicional</span>
+              <span class="value mono" id="sumAdd">$0.00</span>
+            </div>
+
+            <div class="summary-toggles">
+              <div class="toggle">
+                <span>Incluir I.V.A. (16% sobre mano de obra)</span>
+                <div class="toggle-switch" id="toggleIVA"></div>
+              </div>
+            </div>
+
+            <div class="summary-row">
+              <span class="label">I.V.A.</span>
+              <span class="value mono" id="sumIVA">$0.00</span>
+            </div>
+
+            <div class="summary-grand">
+              <span class="label">Total</span>
+              <span class="value mono" id="sumTotal">$0.00</span>
+            </div>
+
+            <div class="summary-actions">
+              <button class="btn btn-primary btn-block" id="btnExportPDF">
+                <span id="btnPDFIcon"></span> Generar PDF
+              </button>
+              <button class="btn btn-secondary btn-block" id="btnSave">
+                <span id="btnSaveIcon"></span> Guardar
+              </button>
+            </div>
+
+            <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08); font-size:11px; color:var(--gray-400); line-height:1.5;">
+              <span style="display:inline-flex; align-items:center; gap:4px;">
+                <span id="autoSaveDot" style="width:6px; height:6px; border-radius:50%; background:var(--success); display:inline-block;"></span>
+                Guardado automático activo
+              </span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="app-foot">
+      19 poniente norte #305 · Las Arboledas · Tuxtla Gutiérrez, Chiapas · 961 120 0355
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-backdrop" id="historyModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+      <div class="modal-header">
+        <div>
+          <h3 id="historyModalTitle">Histórico de cotizaciones</h3>
+          <div class="modal-subtitle" id="historyModalSubtitle">Cargando…</div>
+        </div>
+        <button class="modal-close" id="closeHistoryModal" title="Cerrar"><span id="modalCloseIcon"></span></button>
+      </div>
+
+      <div class="modal-search">
+        <div class="input-group">
+          <span class="addon" style="border-right:1px solid var(--gray-200);"><span id="searchIcon"></span></span>
+          <input type="text" class="input" id="historySearch" placeholder="Buscar por número, cliente o proyecto…" />
+        </div>
+      </div>
+
+      <div class="history-list" id="historyList"></div>
+
+      <div class="modal-foot">
+        <div class="foot-hint">Click en una cotización para abrirla en el editor</div>
+        <button class="btn btn-secondary btn-sm" id="btnSaveCurrentToHistory">
+          <span id="saveCurrentIcon"></span> Guardar cotización actual
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="assets/icons.js?v=2"></script>
+  <script src="assets/catalog.js?v=2"></script>
+  <script src="assets/store.js?v=2"></script>
+  <script src="assets/pdf.js?v=2"></script>
+  <script src="assets/admin.js?v=2"></script>
+</body>
+</html>
