@@ -168,6 +168,7 @@
             </div>
           </div>
         </div>
+        <div class="items-table-wrap">
         <table class="items-table">
           <thead>
             <tr>
@@ -193,6 +194,7 @@
             ${group.items.map(it => itemRowHTML(it, isMO)).join('')}
           </tbody>
         </table>
+        </div>
         <button class="add-row" data-action="add-item">
           ${Icons.get('plus', 14)} Agregar ${isMO ? 'mano de obra' : 'material'}
         </button>
@@ -257,7 +259,9 @@
       if (target.matches('[data-action="group-pct"]')) {
         const groupEl = target.closest('[data-group]');
         const kind = groupEl.dataset.group;
-        section[kind].porcentaje = Number(target.value) || 0;
+        let pct = Number(target.value) || 0;
+        if (pct < 0) { pct = 0; target.value = 0; }
+        section[kind].porcentaje = pct;
         refreshDerived();
         persist();
         return;
@@ -271,7 +275,12 @@
         const item = section[kind].items.find(i => i.id === itemTr.dataset.itemId);
         if (!item) return;
         const field = target.dataset.field;
-        const val = target.type === 'number' ? Number(target.value) : target.value;
+        let val = target.type === 'number' ? Number(target.value) : target.value;
+        // Validación: no permitir negativos en numéricos
+        if (target.type === 'number' && val < 0) {
+          val = 0;
+          target.value = 0;
+        }
         item[field] = val;
         // Update only the importe cell — keep focus
         const cell = itemTr.querySelector('.col-importe');
@@ -497,18 +506,34 @@
       toast(state.__historyId ? 'Cotización guardada en histórico' : 'Cotización agregada al histórico', 'success');
     });
 
-    document.getElementById('btnExportPDF').addEventListener('click', () => {
+    document.getElementById('btnExportPDF').addEventListener('click', async () => {
       if (!state.sections.length) {
         toast('Agrega al menos una sección antes de generar el PDF');
         return;
       }
-      window.PDFGen.generate(state);
-      toast('PDF generado', 'success');
+      const btn = document.getElementById('btnExportPDF');
+      const originalContent = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Generando…';
+      toast('Generando PDF…');
+      try {
+        // Give the UI a tick to render the loading state
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => setTimeout(r, 50));
+        window.PDFGen.generate(state);
+        toast('PDF descargado correctamente', 'success');
+      } catch (e) {
+        console.error(e);
+        toast('No se pudo generar el PDF. Intenta de nuevo.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+      }
     });
 
     document.getElementById('btnPreview').addEventListener('click', () => {
       const totals = Store.grandTotals(state);
-      alert(`Vista previa rápida:\n\nCliente: ${state.cliente.atencion || '—'}\nProyecto: ${state.cliente.proyecto || '—'}\nSecciones: ${state.sections.length}\nTotal: ${fmt.money(totals.total)}\n\nUsa "Generar PDF" para ver el documento final.`);
+      toast(`${state.sections.length} sección${state.sections.length === 1 ? '' : 'es'} · ${fmt.money(totals.total)}`, 'success');
     });
   }
 

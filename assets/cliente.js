@@ -253,10 +253,24 @@
   // ============================================================
   // ACTIONS
   // ============================================================
-  document.getElementById('btnDownloadEst').addEventListener('click', () => {
+  document.getElementById('btnDownloadEst').addEventListener('click', async () => {
     if (!window.__estimateState) return;
-    PDFGen.generate(window.__estimateState);
-    toast('PDF descargado', 'success');
+    const btn = document.getElementById('btnDownloadEst');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Generando PDF…';
+    try {
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => setTimeout(r, 50));
+      PDFGen.generate(window.__estimateState);
+      toast('PDF descargado correctamente', 'success');
+    } catch (e) {
+      console.error(e);
+      toast('No se pudo generar el PDF. Intenta de nuevo.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalContent;
+    }
   });
 
   document.getElementById('btnRequestFormal').addEventListener('click', () => {
